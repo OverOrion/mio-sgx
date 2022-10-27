@@ -1,7 +1,7 @@
-use event_imp::{Ready, ready_as_usize, ready_from_usize};
+use event_imp::{ready_as_usize, ready_from_usize, Ready};
 
-use std::ops;
 use std::fmt;
+use std::ops;
 
 /// Unix specific extensions to `Ready`
 ///
@@ -93,21 +93,29 @@ use std::fmt;
 pub struct UnixReady(Ready);
 
 const ERROR: usize = 0b00_0100;
-const HUP: usize   = 0b00_1000;
+const HUP: usize = 0b00_1000;
 
-#[cfg(any(target_os = "dragonfly",
-    target_os = "freebsd", target_os = "ios", target_os = "macos"))]
-const AIO: usize   = 0b01_0000;
+#[cfg(any(
+    target_os = "dragonfly",
+    target_os = "freebsd",
+    target_os = "ios",
+    target_os = "macos"
+))]
+const AIO: usize = 0b01_0000;
 
-#[cfg(not(any(target_os = "dragonfly",
-    target_os = "freebsd", target_os = "ios", target_os = "macos")))]
-const AIO: usize   = 0b00_0000;
+#[cfg(not(any(
+    target_os = "dragonfly",
+    target_os = "freebsd",
+    target_os = "ios",
+    target_os = "macos"
+)))]
+const AIO: usize = 0b00_0000;
 
 #[cfg(any(target_os = "freebsd"))]
-const LIO: usize   = 0b10_0000;
+const LIO: usize = 0b10_0000;
 
 #[cfg(not(any(target_os = "freebsd")))]
-const LIO: usize   = 0b00_0000;
+const LIO: usize = 0b00_0000;
 
 #[cfg(any(target_os = "linux", target_os = "android", target_os = "solaris"))]
 const PRI: usize = 0b100_0000;
@@ -150,14 +158,22 @@ impl UnixReady {
     ///
     /// [`Poll`]: ../struct.Poll.html
     #[inline]
-    #[cfg(any(target_os = "dragonfly",
-        target_os = "freebsd", target_os = "ios", target_os = "macos"))]
+    #[cfg(any(
+        target_os = "dragonfly",
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos"
+    ))]
     pub fn aio() -> UnixReady {
         UnixReady(ready_from_usize(AIO))
     }
 
-    #[cfg(not(any(target_os = "dragonfly",
-        target_os = "freebsd", target_os = "ios", target_os = "macos")))]
+    #[cfg(not(any(
+        target_os = "dragonfly",
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos"
+    )))]
     #[deprecated(since = "0.6.12", note = "this function is now platform specific")]
     #[doc(hidden)]
     pub fn aio() -> UnixReady {
@@ -258,8 +274,7 @@ impl UnixReady {
     ///
     /// [`Poll`]: struct.Poll.html
     #[inline]
-    #[cfg(any(target_os = "linux",
-        target_os = "android", target_os = "solaris"))]
+    #[cfg(any(target_os = "linux", target_os = "android", target_os = "solaris"))]
     pub fn priority() -> UnixReady {
         UnixReady(ready_from_usize(PRI))
     }
@@ -280,16 +295,24 @@ impl UnixReady {
     ///
     /// [`Poll`]: ../struct.Poll.html
     #[inline]
-    #[cfg(any(target_os = "dragonfly",
-        target_os = "freebsd", target_os = "ios", target_os = "macos"))]
+    #[cfg(any(
+        target_os = "dragonfly",
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos"
+    ))]
     pub fn is_aio(&self) -> bool {
         self.contains(ready_from_usize(AIO))
     }
 
     #[deprecated(since = "0.6.12", note = "this function is now platform specific")]
     #[cfg(feature = "with-deprecated")]
-    #[cfg(not(any(target_os = "dragonfly",
-        target_os = "freebsd", target_os = "ios", target_os = "macos")))]
+    #[cfg(not(any(
+        target_os = "dragonfly",
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos"
+    )))]
     #[doc(hidden)]
     pub fn is_aio(&self) -> bool {
         false
@@ -385,8 +408,7 @@ impl UnixReady {
     ///
     /// [`Poll`]: struct.Poll.html
     #[inline]
-    #[cfg(any(target_os = "linux",
-        target_os = "android", target_os = "solaris"))]
+    #[cfg(any(target_os = "linux", target_os = "android", target_os = "solaris"))]
     pub fn is_priority(&self) -> bool {
         self.contains(ready_from_usize(PRI))
     }
@@ -454,7 +476,6 @@ impl ops::Sub for UnixReady {
     }
 }
 
-#[deprecated(since = "0.6.10", note = "removed")]
 #[cfg(feature = "with-deprecated")]
 #[doc(hidden)]
 impl ops::Not for UnixReady {
@@ -476,14 +497,15 @@ impl fmt::Debug for UnixReady {
             (UnixReady::hup(), "Hup"),
             #[allow(deprecated)]
             (UnixReady::aio(), "Aio"),
-            #[cfg(any(target_os = "linux",
-                target_os = "android", target_os = "solaris"))]
+            #[cfg(any(target_os = "linux", target_os = "android", target_os = "solaris"))]
             (UnixReady::priority(), "Priority"),
         ];
 
         for &(flag, msg) in &flags {
             if self.contains(flag) {
-                if one { write!(fmt, " | ")? }
+                if one {
+                    write!(fmt, " | ")?
+                }
                 write!(fmt, "{}", msg)?;
 
                 one = true

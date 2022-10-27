@@ -7,7 +7,7 @@
 //!
 /// [portability guidelines]: ../struct.Poll.html#portability
 use std::fmt;
-use std::io::{Read, Write};
+use std::io::{Error, ErrorKind, Read, Write};
 use std::net::{self, Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrV4, SocketAddrV6};
 use std::time::Duration;
 
@@ -523,32 +523,32 @@ impl TcpListener {
             SocketAddr::V6(..) => TcpBuilder::new_v6(),
         } {
             Ok(it) => it,
-            Err(err) => return Error::new(ErrorKind::Other, "TcpBuilder err"),
+            Err(err) => return Err(Error::new(ErrorKind::Other, "TcpBuilder err")),
         };
 
         // Set SO_REUSEADDR, but only on Unix (mirrors what libstd does)
         if cfg!(unix) {
             match sock.reuse_address(true) {
                 Ok(it) => it,
-                Err(err) => return Error::new(ErrorKind::Other, "sock.reuse_address err"),
+                Err(err) => return Err(Error::new(ErrorKind::Other, "sock.reuse_address err")),
             };
         }
 
         // Bind the socket
         match sock.bind(addr) {
             Ok(it) => it,
-            Err(err) => return Error::new(ErrorKind::Other, "bind syscall err"),
+            Err(err) => return Err(Error::new(ErrorKind::Other, "bind syscall err")),
         };
 
         // listen
         let listener = match sock.listen(1024) {
             Ok(it) => it,
-            Err(err) => return Error::new(ErrorKind::Other, "listen 1024 syscall err"),
+            Err(err) => return Err(Error::new(ErrorKind::Other, "listen 1024 syscall err")),
         };
         Ok(TcpListener {
             sys: match sys::TcpListener::new(listener) {
                 Ok(it) => it,
-                Err(err) => return Error::new(ErrorKind::Other, "sys::TcpListener::new err"),
+                Err(err) => return Err(Error::new(ErrorKind::Other, "sys::TcpListener::new err")),
             },
             selector_id: SelectorId::new(),
         })
